@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Integrasia Smart Dashboard - Revised</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              dark: {
+                900: "#0f172a", // Background utama
+                800: "#1e293b", // Card background
+                700: "#334155", // Borders
+              },
+              accent: {
+                blue: "#38bdf8",
+                green: "#10b981",
+                red: "#ef4444",
+                yellow: "#f59e0b",
+              },
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+      /* Sedikit custom CSS untuk scrollbar agar lebih rapi (opsional) */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0f172a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-dark-900 text-slate-50 h-screen flex overflow-hidden font-sans"
+  >
+    <aside
+      class="w-64 bg-[#0b1120] border-r border-dark-700 flex flex-col p-5 shrink-0 transition-all"
+    >
+      <div
+        class="text-2xl font-bold text-accent-blue mb-8 tracking-wider uppercase"
+      >
+        SD-AI-CC INDONUSA
+      </div>
+
+      <nav class="space-y-2">
+        <a
+          href="#"
+          class="flex items-center px-4 py-3 bg-accent-blue/10 text-accent-blue rounded-lg transition-colors"
+        >
+          <i class="fas fa-home w-6"></i>
+          <span class="font-medium">Executive View</span>
+        </a>
+        <a
+          href="osmap.html"
+          class="flex items-center px-4 py-3 text-slate-400 hover:bg-dark-700/50 hover:text-accent-blue rounded-lg transition-colors"
+        >
+          <i class="fas fa-map-marked-alt w-6"></i>
+          <span>OSMAP (Spatial)</span>
+        </a>
+        <a
+          href="ospro.html"
+          class="flex items-center px-4 py-3 text-slate-400 hover:bg-dark-700/50 hover:text-accent-blue rounded-lg transition-colors"
+        >
+          <i class="fas fa-building w-6"></i>
+          <span>OSPRO (Project)</span>
+        </a>
+        <a
+          href="oslog.html"
+          class="flex items-center px-4 py-3 text-slate-400 hover:bg-dark-700/50 hover:text-accent-blue rounded-lg transition-colors"
+        >
+          <i class="fas fa-truck-moving w-6"></i>
+          <span>OSLOG (Equip)</span>
+        </a>
+        <a
+          href="siopas.html"
+          class="flex items-center px-4 py-3 text-slate-400 hover:bg-dark-700/50 hover:text-accent-blue rounded-lg transition-colors"
+        >
+          <i class="fas fa-exclamation-triangle w-6"></i>
+          <span>SIOPAS (Alert)</span>
+        </a>
+      </nav>
+
+      <div class="mt-auto pt-6 border-t border-dark-700">
+        <div class="text-xs text-slate-500 uppercase font-semibold mb-2">
+          System Status
+        </div>
+        <div class="flex items-center gap-2 text-sm text-accent-green">
+          <div class="w-2 h-2 rounded-full bg-accent-green animate-pulse"></div>
+          Online • v2.4.0
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1 p-6 overflow-y-auto flex flex-col gap-6">
+      <header class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-semibold">Command Center</h1>
+          <p class="text-slate-400 text-sm mt-1">
+            Welcome back, Chief Executive Officer
+          </p>
+        </div>
+
+        <div
+          class="flex items-center gap-3 bg-dark-800 px-4 py-2 rounded-full border border-dark-700"
+        >
+          <div class="text-right mr-1">
+            <div class="text-sm font-semibold">xxxx xxxxx</div>
+            <div class="text-xs text-slate-400">CEO / BOD</div>
+          </div>
+          <div
+            class="w-9 h-9 bg-accent-blue rounded-full flex items-center justify-center text-white font-bold text-sm"
+          >
+            BS
+          </div>
+        </div>
+      </header>
+
+      <section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div
+          class="bg-dark-800 p-5 rounded-xl border border-dark-700 relative overflow-hidden group hover:border-accent-green/50 transition-colors"
+        >
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-green"></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">
+            Total Asset Value
+          </div>
+          <div class="text-2xl font-bold text-white mb-1">IDR 2.4T</div>
+          <div class="text-xs flex items-center gap-1 text-accent-green">
+            <i class="fas fa-arrow-up"></i> 12% vs LY
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 p-5 rounded-xl border border-dark-700 relative overflow-hidden hover:border-accent-yellow/50 transition-colors"
+        >
+          <div
+            class="absolute left-0 top-0 bottom-0 w-1 bg-accent-yellow"
+          ></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">
+            Project Health
+          </div>
+          <div class="text-2xl font-bold text-white mb-1">87%</div>
+          <div class="text-xs flex items-center gap-1 text-accent-red">
+            <i class="fas fa-arrow-down"></i> 3 Projects Delay
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 p-5 rounded-xl border border-dark-700 relative overflow-hidden hover:border-accent-green/50 transition-colors"
+        >
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-green"></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">
+            Op. Efficiency
+          </div>
+          <div class="text-2xl font-bold text-white mb-1">94%</div>
+          <div class="text-xs flex items-center gap-1 text-accent-green">
+            <i class="fas fa-arrow-up"></i> Optimal
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 p-5 rounded-xl border border-dark-700 relative overflow-hidden hover:border-accent-green/50 transition-colors"
+        >
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-green"></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">
+            Asset Util.
+          </div>
+          <div class="text-2xl font-bold text-white mb-1">78%</div>
+          <div class="text-xs flex items-center gap-1 text-accent-green">
+            <i class="fas fa-bolt"></i> High Activity
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 p-5 rounded-xl border border-dark-700 relative overflow-hidden hover:border-accent-red/50 transition-colors"
+        >
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-red"></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">
+            Cost vs Budget
+          </div>
+          <div class="text-2xl font-bold text-white mb-1">+5.2%</div>
+          <div class="text-xs flex items-center gap-1 text-accent-red">
+            <i class="fas fa-exclamation-circle"></i> Overbudget
+          </div>
+        </div>
+      </section>
+
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[720px]">
+        <div
+          class="lg:col-span-2 lg:row-span-2 bg-dark-800 rounded-2xl border border-dark-700 p-6 flex flex-col relative"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">
+              Spatial Intelligence (Sentul Area)
+            </h2>
+            <button
+              class="text-xs bg-dark-700 hover:bg-dark-600 text-white px-3 py-1.5 rounded transition"
+            >
+              <i class="fas fa-filter mr-1"></i> Filter Area
+            </button>
+          </div>
+
+          <div
+            class="flex-1 bg-[#24344e] rounded-lg relative overflow-hidden group"
+            style="
+              background-image: radial-gradient(#334155 1px, transparent 1px);
+              background-size: 20px 20px;
+            "
+          >
+        
+          <div
+            id="sentulMap"
+            class="absolute inset-0 z-0"
+          ></div>
+
+            <div
+              class="absolute bottom-4 left-4 bg-dark-900/90 backdrop-blur p-3 rounded-lg text-xs space-y-1 border border-dark-700"
+            >
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-accent-green"></span> Asset
+                OK (120)
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-accent-yellow"></span>
+                Maintenance (15)
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-accent-red"></span>
+                Critical (5)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 rounded-2xl border border-dark-700 p-6 flex flex-col h-[350px]"
+        >
+          <h2 class="text-lg font-semibold mb-4">Performance Trend</h2>
+          <div class="flex-1 relative w-full h-full">
+            <canvas id="performanceChart"></canvas>
+          </div>
+        </div>
+
+        <div class="grid grid-rows-2 gap-6 h-[350px]">
+          <div
+            class="bg-dark-800 rounded-2xl border border-dark-700 p-5 flex flex-col overflow-hidden"
+          >
+            <h2
+              class="text-sm font-semibold uppercase text-slate-400 mb-3 tracking-wider"
+            >
+              Top Projects
+            </h2>
+            <div class="overflow-auto">
+              <table class="w-full text-sm text-left">
+                <thead
+                  class="text-xs text-slate-500 uppercase border-b border-dark-700"
+                >
+                  <tr>
+                    <th class="pb-2 font-normal">Name</th>
+                    <th class="pb-2 font-normal">Progress</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-dark-700">
+                  <tr class="group hover:bg-dark-700/30">
+                    <td class="py-2.5 pr-2">Sentul Twr A</td>
+                    <td class="py-2.5">
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="flex-1 h-1.5 bg-dark-700 rounded-full overflow-hidden"
+                        >
+                          <div class="h-full bg-accent-green w-3/4"></div>
+                        </div>
+                        <span
+                          class="text-[10px] text-accent-green bg-accent-green/10 px-1.5 py-0.5 rounded"
+                          >OK</span
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="group hover:bg-dark-700/30">
+                    <td class="py-2.5 pr-2">Bridge Const.</td>
+                    <td class="py-2.5">
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="flex-1 h-1.5 bg-dark-700 rounded-full overflow-hidden"
+                        >
+                          <div class="h-full bg-accent-red w-[45%]"></div>
+                        </div>
+                        <span
+                          class="text-[10px] text-accent-red bg-accent-red/10 px-1.5 py-0.5 rounded"
+                          >Delay</span
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div
+            class="bg-dark-800 rounded-2xl border border-dark-700 p-5 flex flex-col"
+          >
+            <div class="flex justify-between items-center mb-3">
+              <h2
+                class="text-sm font-semibold uppercase text-accent-red tracking-wider"
+              >
+                Critical Alerts
+              </h2>
+              <span class="text-xs bg-accent-red text-white px-1.5 rounded"
+                >3</span
+              >
+            </div>
+
+            <div class="space-y-2 overflow-y-auto pr-1">
+              <div
+                class="flex gap-3 p-3 rounded-lg bg-dark-900/50 border-l-2 border-accent-red"
+              >
+                <i class="fas fa-exclamation-circle text-accent-red mt-0.5"></i>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-200">
+                    Project Overbudget Risk
+                  </h4>
+                  <p class="text-[10px] text-slate-400">
+                    Bridge Construction +5% cost
+                  </p>
+                </div>
+              </div>
+              <div
+                class="flex gap-3 p-3 rounded-lg bg-dark-900/50 border-l-2 border-accent-yellow"
+              >
+                <i class="fas fa-clock text-accent-yellow mt-0.5"></i>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-200">
+                    Maintenance Overdue
+                  </h4>
+                  <p class="text-[10px] text-slate-400">
+                    Excavator #04 needs service
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const ctx = document.getElementById("performanceChart").getContext("2d");
+
+      // Gradient Fill
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, "rgba(56, 189, 248, 0.2)"); // accent-blue
+      gradient.addColorStop(1, "rgba(56, 189, 248, 0)");
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+          datasets: [
+            {
+              label: "Asset Value",
+              data: [120, 135, 140, 145, 160, 180],
+              borderColor: "#38bdf8", // accent-blue
+              backgroundColor: gradient,
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: "#0f172a",
+              pointBorderWidth: 2,
+            },
+            {
+              label: "Op. Cost",
+              data: [80, 82, 85, 90, 88, 92],
+              borderColor: "#f59e0b", // accent-yellow
+              borderDash: [5, 5],
+              tension: 0.4,
+              fill: false,
+              pointRadius: 0,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: "#94a3b8", font: { size: 10 } } },
+          },
+          scales: {
+            y: {
+              grid: { color: "#334155" },
+              ticks: { color: "#94a3b8", font: { size: 10 } },
+              border: { display: false },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: "#94a3b8", font: { size: 10 } },
+              border: { display: false },
+            },
+          },
+        },
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // 1️ INIT MAP
+        const map = L.map("sentulMap", {
+          zoomControl: false,
+          attributionControl: false,
+        }).setView([-6.553, 106.8503], 15);
+
+        // 2️ BASE MAP
+        L.tileLayer(
+          "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+          { maxZoom: 19 }
+        ).addTo(map);
+
+        // 3️ ICON CONFIG
+        const assetIcon = L.divIcon({
+          html: '<i class="fas fa-map-pin text-accent-green text-xl"></i>',
+          className: "",
+          iconSize: [24, 24],
+          iconAnchor: [12, 24],
+        });
+
+        const maintenanceIcon = L.divIcon({
+          html: '<i class="fas fa-tools text-accent-yellow text-xl"></i>',
+          className: "",
+          iconSize: [24, 24],
+          iconAnchor: [12, 24],
+        });
+
+        const criticalIcon = L.divIcon({
+          html:
+            '<i class="fas fa-exclamation-circle text-accent-red text-xl"></i>',
+          className: "",
+          iconSize: [24, 24],
+          iconAnchor: [12, 24],
+        });
+
+        // 4️ DATA MARKER (FIX & TERSTRUKTUR)
+        const markerData = [];
+
+        // marker utama (tetap)
+        markerData.push(
+          {
+            type: "asset",
+            lat: -6.5542,
+            lng: 106.8473,
+            title: "Cluster A",
+            status: "Safe",
+            value: "IDR 500M",
+          },
+          {
+            type: "maintenance",
+            lat: -6.5581,
+            lng: 106.8531,
+            title: "Excavator #04",
+            status: "Maintenance",
+          },
+          {
+            type: "critical",
+            lat: -6.5613,
+            lng: 106.8445,
+            title: "Bridge Project",
+            status: "Critical Delay",
+          }
+        );
+
+        // marker tambahan (grid tetap, tidak random)
+        const baseLat = -6.5432;
+        const baseLng = 106.8503;
+        const centerLat = -6.5495;
+        const centerLng = 106.8503;
+        const totalMarkers = 30;
+        const radiusStep = 0.0020; // jarak antar ring
+
+        for (let i = 1; i <= totalMarkers; i++) {
+          const typeList = ["asset", "maintenance", "critical"];
+          const type = typeList[i % 3];
+
+          // ring & sudut (deterministic, bukan random)
+          const ring = Math.floor(i / 6);
+          const angle = (i * 45 * Math.PI) / 180; // sebar melingkar
+
+          const lat =
+            centerLat +
+            Math.cos(angle) * ring * radiusStep -
+            ring * 0.0002;
+
+          const lng =
+            centerLng +
+            Math.sin(angle) * ring * radiusStep +
+            ring * 0.00015;
+
+          markerData.push({
+            type,
+            lat,
+            lng,
+            title: `${type.toUpperCase()} ${i}`,
+            status:
+              type === "asset"
+                ? "Operational"
+                : type === "maintenance"
+                ? "Maintenance Due"
+                : "Critical",
+            value: type === "asset" ? `IDR ${100 + i * 10}M` : null,
+          });
+        }
+
+        // 5️ HELPER
+        function getIcon(type) {
+          if (type === "asset") return assetIcon;
+          if (type === "maintenance") return maintenanceIcon;
+          return criticalIcon;
+        }
+
+        function getColor(type) {
+          if (type === "asset") return "#10b981";
+          if (type === "maintenance") return "#f59e0b";
+          return "#ef4444";
+        }
+
+        // 6️ RENDER MARKER (HOVER ONLY)
+        const typeCounter = { asset: 0, maintenance: 0, critical: 0 };
+
+        markerData.forEach((item) => {
+          // hitung index per tipe
+          const i = typeCounter[item.type]++;
+          
+          let offsetLat = 0;
+          let offsetLng = 0;
+
+          if (item.type === "asset") {
+            offsetLng = -0.00025 * (i % 3);
+          }
+
+          if (item.type === "maintenance") {
+            offsetLng = 0.00025 * (i % 3);
+          }
+
+          if (item.type === "critical") {
+            const angle = (i * 60 * Math.PI) / 180; // fan-out
+            offsetLat = Math.cos(angle) * 0.00045;
+            offsetLng = Math.sin(angle) * 0.00055;
+          }
+
+          const marker = L.marker(
+            [item.lat + offsetLat, item.lng + offsetLng],
+            {
+              icon: getIcon(item.type),
+            }
+          ).addTo(map);
+
+          marker.bindTooltip(
+            `
+            <div class="text-xs">
+              <b>${item.title}</b><br/>
+              Status:
+              <span style="color:${getColor(item.type)}">
+                ${item.status}
+              </span>
+              ${
+                item.value
+                  ? `<br/>Value: <b>${item.value}</b>`
+                  : ""
+              }
+            </div>
+            `,
+            {
+              direction: "top",
+              offset: [0, -10],
+              opacity: 0.95,
+              sticky: false,
+            }
+          );
+
+          marker.on("click", () => {});
+        });
+      });
+    </script>
+  </body>
+</html>
