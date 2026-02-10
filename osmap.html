@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSMAP - Spatial Intelligence</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <script>
+      tailwind.config = {
+          theme: {
+              extend: {
+                  colors: {
+                      dark: { 900: '#0f172a', 800: '#1e293b', 700: '#334155', 900: 'rgba(15, 23, 42, 0.85)' },
+                      accent: { blue: '#38bdf8', green: '#10b981', red: '#ef4444', yellow: '#f59e0b' }
+                  },
+                  fontFamily: { sans: ['Inter', 'sans-serif'] }
+              }
+          }
+      }
+    </script>
+
+    <style>
+      /* CSS Khusus Peta */
+      #map {
+        height: 100vh;
+        width: 100%;
+        z-index: 0;
+        background: #0f172a;
+      }
+
+      /* Custom Marker Styles */
+      .custom-marker {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        color: white;
+        font-size: 14px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        transition: all 0.3s ease;
+      }
+      .marker-pulse {
+        animation: pulse-animation 2s infinite;
+      }
+
+      @keyframes pulse-animation {
+        0% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+      }
+
+      /* Glassmorphism Panel */
+      .glass-panel {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-dark-900 text-slate-50 overflow-hidden relative">
+    <div id="map"></div>
+
+    <div class="absolute top-5 left-5 z-[1000]">
+      <a
+        href="main.html"
+        class="glass-panel text-white px-4 py-2 rounded-lg hover:bg-accent-blue/20 transition flex items-center gap-2"
+      >
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+
+    <div
+      class="absolute top-5 right-5 z-[1000] w-72 glass-panel rounded-xl p-4 shadow-2xl"
+    >
+      <h2 class="text-lg font-bold text-accent-blue mb-1">
+        Spatial Intelligence
+      </h2>
+      <p class="text-xs text-slate-400 mb-4">
+        Sentul Industrial Estate View [cite: 58]
+      </p>
+
+      <div class="space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2"
+            ><i class="fas fa-circle text-accent-green"></i> Operational
+            Asset</span
+          >
+          <span class="font-bold">142</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2"
+            ><i class="fas fa-circle text-accent-yellow"></i> Maintenance</span
+          >
+          <span class="font-bold">15</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2"
+            ><i class="fas fa-circle text-accent-red animate-pulse"></i>
+            Critical Risk</span
+          >
+          <span class="font-bold">3</span>
+        </div>
+      </div>
+
+      <hr class="border-gray-600 my-3" />
+
+      <div class="grid grid-cols-2 gap-2">
+        <button
+          class="bg-accent-blue/20 hover:bg-accent-blue/40 text-accent-blue py-1 rounded text-xs border border-accent-blue/30 transition"
+        >
+          <i class="fas fa-layer-group mr-1"></i> Asset Layer
+        </button>
+        <button
+          class="bg-dark-800 hover:bg-dark-700 text-slate-400 py-1 rounded text-xs border border-gray-600 transition"
+        >
+          <i class="fas fa-road mr-1"></i> Infra Layer
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="assetPanel"
+      class="absolute bottom-5 left-5 z-[1000] w-80 glass-panel rounded-xl p-0 shadow-2xl translate-y-[120%] transition-transform duration-300 ease-in-out"
+    >
+      <div
+        class="h-2 w-full bg-accent-blue rounded-t-xl"
+        id="panelStatusLine"
+      ></div>
+      <div class="p-5">
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <h3 class="text-lg font-bold text-white" id="panelName">
+              Loading...
+            </h3>
+            <span
+              class="text-xs px-2 py-0.5 rounded bg-accent-blue/20 text-accent-blue border border-accent-blue/20"
+              id="panelType"
+              >Excavator</span
+            >
+          </div>
+          <button
+            onclick="closePanel()"
+            class="text-slate-400 hover:text-white"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="bg-dark-900/50 p-2 rounded">
+            <div class="text-[10px] text-slate-400 uppercase">
+              Asset Value [cite: 66]
+            </div>
+            <div class="font-bold text-sm" id="panelValue">IDR 0</div>
+          </div>
+          <div class="bg-dark-900/50 p-2 rounded">
+            <div class="text-[10px] text-slate-400 uppercase">
+              Condition [cite: 67]
+            </div>
+            <div class="font-bold text-sm" id="panelCondition">Good</div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div>
+            <div class="flex justify-between text-xs text-slate-400 mb-1">
+              <span>Utilization</span>
+              <span id="panelUtil">0%</span>
+            </div>
+            <div class="w-full bg-dark-700 h-1.5 rounded-full overflow-hidden">
+              <div
+                id="panelBar"
+                class="h-full bg-accent-green"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+
+          <div
+            id="alertBox"
+            class="hidden mt-3 p-2 bg-accent-red/10 border border-accent-red/30 rounded text-xs text-accent-red flex items-center gap-2"
+          >
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="alertText">No Issues</span>
+          </div>
+        </div>
+
+        <button
+          class="w-full mt-4 bg-accent-blue hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition shadow-lg shadow-accent-blue/20"
+        >
+          View Maintenance Log
+        </button>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+      // 1. Inisialisasi Peta (Koordinat Sentul City / Industrial dummy)
+      // Menggunakan Tiles Dark Matter untuk kesan 'Premium'
+      const map = L.map("map", {
+        zoomControl: false, // Kita pindahkan zoom control nanti atau hide biar bersih
+      }).setView([-6.55, 106.85], 14); // Koordinat sekitar Sentul
+
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution: "&copy; OpenStreetMap &copy; CARTO",
+          subdomains: "abcd",
+          maxZoom: 19,
+        },
+      ).addTo(map);
+
+      // 2. Dummy Data Aset [cite: 60-63]
+      const assets = [
+        {
+          id: 1,
+          type: "Excavator",
+          name: "EXC-004 Komatsu",
+          lat: -6.552,
+          lng: 106.848,
+          status: "active",
+          value: "IDR 2.4M",
+          condition: "Excellent",
+          util: 85,
+          alert: null,
+        },
+        {
+          id: 2,
+          type: "Dump Truck",
+          name: "DT-102 Hino",
+          lat: -6.548,
+          lng: 106.852,
+          status: "maintenance",
+          value: "IDR 850jt",
+          condition: "Service Due",
+          util: 40,
+          alert: "Maintenance Overdue",
+        },
+        {
+          id: 3,
+          type: "Crane",
+          name: "CRN-09 Sany",
+          lat: -6.555,
+          lng: 106.855,
+          status: "critical",
+          value: "IDR 5.2M",
+          condition: "Critical Failure",
+          util: 0,
+          alert: "Hydraulic Leak Detected",
+        },
+        {
+          id: 4,
+          type: "Project Site",
+          name: "Sentul Tower B",
+          lat: -6.545,
+          lng: 106.845,
+          status: "active",
+          value: "IDR 120M (WIP)",
+          condition: "On Track",
+          util: 92,
+          alert: null,
+        },
+      ];
+
+      // 3. Fungsi Render Marker
+      assets.forEach((asset) => {
+        // Tentukan Warna & Icon berdasarkan status
+        let colorClass = "bg-accent-green";
+        let iconClass = "fa-check";
+        let pulseClass = "";
+        let ringColor = "rgba(16, 185, 129, 0.4)";
+
+        if (asset.status === "maintenance") {
+          colorClass = "bg-accent-yellow";
+          iconClass = "fa-tools";
+          ringColor = "rgba(245, 158, 11, 0.4)";
+        } else if (asset.status === "critical") {
+          colorClass = "bg-accent-red";
+          iconClass = "fa-exclamation";
+          pulseClass = "marker-pulse"; // Efek animasi berkedip
+          ringColor = "rgba(239, 68, 68, 0.4)";
+        } else if (asset.type === "Project Site") {
+          colorClass = "bg-accent-blue";
+          iconClass = "fa-building";
+          ringColor = "rgba(56, 189, 248, 0.4)";
+        }
+
+        // Buat HTML Icon Custom
+        const customIcon = L.divIcon({
+          className: "custom-div-icon",
+          html: `<div class="custom-marker ${colorClass} ${pulseClass}" style="width: 36px; height: 36px; border: 3px solid #0f172a;">
+                        <i class="fas ${iconClass}"></i>
+                       </div>`,
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+        });
+
+        // Tambahkan Marker ke Peta
+        const marker = L.marker([asset.lat, asset.lng], {
+          icon: customIcon,
+        }).addTo(map);
+
+        // 4. Interaksi Klik Marker [cite: 64]
+        marker.on("click", () => {
+          showAssetDetails(asset, colorClass);
+
+          // Animasi Zoom ke lokasi
+          map.flyTo([asset.lat, asset.lng], 16, {
+            animate: true,
+            duration: 1.5,
+          });
+        });
+      });
+
+      // 5. Logika Panel Detail (Muncul dari bawah)
+      function showAssetDetails(asset, colorClass) {
+        const panel = document.getElementById("assetPanel");
+        const statusLine = document.getElementById("panelStatusLine");
+        const alertBox = document.getElementById("alertBox");
+
+        // Isi Data
+        document.getElementById("panelName").innerText = asset.name;
+        document.getElementById("panelType").innerText = asset.type;
+        document.getElementById("panelValue").innerText = asset.value;
+        document.getElementById("panelCondition").innerText = asset.condition;
+        document.getElementById("panelUtil").innerText = asset.util + "%";
+        document.getElementById("panelBar").style.width = asset.util + "%";
+
+        // Styling Status Line & Bar Color
+        // Hapus class lama dulu
+        statusLine.className = `h-2 w-full rounded-t-xl ${colorClass}`;
+        document.getElementById("panelBar").className = `h-full ${colorClass}`;
+
+        // Handle Alert
+        if (asset.alert) {
+          alertBox.classList.remove("hidden");
+          document.getElementById("alertText").innerText = asset.alert;
+        } else {
+          alertBox.classList.add("hidden");
+        }
+
+        // Animasi Slide Up
+        panel.classList.remove("translate-y-[120%]");
+      }
+
+      function closePanel() {
+        document
+          .getElementById("assetPanel")
+          .classList.add("translate-y-[120%]");
+        // Zoom out sedikit saat close
+        map.flyTo([-6.55, 106.85], 14, { animate: true });
+      }
+    </script>
+  </body>
+</html>

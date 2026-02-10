@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIOPAS - Early Warning Center</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              dark: {
+                900: "#0f172a",
+                800: "#1e293b",
+                700: "#334155",
+                600: "#475569",
+              },
+              accent: {
+                blue: "#38bdf8",
+                green: "#10b981",
+                red: "#ef4444",
+                yellow: "#f59e0b",
+                purple: "#8b5cf6",
+              },
+            },
+            fontFamily: { sans: ["Inter", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-dark-900 text-slate-50 min-h-screen flex flex-col font-sans">
+    <nav
+      class="bg-dark-800 border-b border-dark-700 px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-lg"
+    >
+      <div class="flex items-center gap-4">
+        <a
+          href="main.html"
+          class="bg-dark-700 hover:bg-dark-600 text-slate-300 px-3 py-2 rounded-lg transition"
+        >
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+          <h1 class="text-xl font-bold text-accent-red tracking-wide">
+            SIOPAS
+            <span class="text-slate-500 font-normal"
+              >| Early Warning System</span
+            >
+          </h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div
+          class="px-3 py-1 bg-accent-red/10 border border-accent-red/20 rounded-full flex items-center gap-2"
+        >
+          <span class="w-2 h-2 rounded-full bg-accent-red animate-pulse"></span>
+          <span class="text-xs font-bold text-accent-red"
+            >High Risk Level detected</span
+          >
+        </div>
+        <button
+          class="bg-dark-700 hover:bg-dark-600 text-white p-2 rounded-lg transition"
+        >
+          <i class="fas fa-cog"></i>
+        </button>
+      </div>
+    </nav>
+
+    <main
+      class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-80px)] overflow-hidden"
+    >
+      <div class="lg:col-span-4 flex flex-col gap-4 h-full">
+        <div class="grid grid-cols-2 gap-4 shrink-0">
+          <div
+            class="bg-dark-800 p-4 rounded-xl border-l-4 border-accent-red shadow-lg"
+          >
+            <div class="text-xs text-slate-400 uppercase font-bold">
+              Critical Alerts
+            </div>
+            <div class="text-3xl font-bold text-white mt-1">3</div>
+            <div class="text-[10px] text-accent-red mt-1">
+              Requires Immediate Action
+            </div>
+          </div>
+          <div
+            class="bg-dark-800 p-4 rounded-xl border-l-4 border-accent-yellow shadow-lg"
+          >
+            <div class="text-xs text-slate-400 uppercase font-bold">
+              Warnings
+            </div>
+            <div class="text-3xl font-bold text-white mt-1">5</div>
+            <div class="text-[10px] text-accent-yellow mt-1">
+              Potential Risks
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-2 shrink-0">
+          <input
+            type="text"
+            placeholder="Search alerts..."
+            class="bg-dark-800 border border-dark-700 text-xs px-3 py-2 rounded-lg text-white w-full focus:outline-none focus:border-accent-blue"
+          />
+          <button
+            class="bg-dark-800 border border-dark-700 px-3 rounded-lg text-slate-400 hover:text-white"
+          >
+            <i class="fas fa-filter"></i>
+          </button>
+        </div>
+
+        <div
+          class="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar"
+          id="alertListContainer"
+        ></div>
+      </div>
+
+      <div class="lg:col-span-8 flex flex-col h-full gap-6">
+        <div
+          class="bg-dark-800 rounded-2xl border border-dark-700 flex-1 p-8 shadow-2xl relative overflow-hidden flex flex-col justify-center items-center text-center"
+          id="emptyState"
+        >
+          <div
+            class="w-20 h-20 bg-dark-700 rounded-full flex items-center justify-center mb-4 text-slate-500 text-3xl"
+          >
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h2 class="text-xl font-bold text-slate-300">
+            Select an Alert to Analyze
+          </h2>
+          <p class="text-slate-500 text-sm mt-2 max-w-md">
+            SIOPAS uses predictive modeling to estimate the impact of
+            operational risks. Click an item on the left to run a simulation.
+          </p>
+        </div>
+
+        <div
+          class="hidden bg-dark-800 rounded-2xl border border-dark-700 flex-1 p-0 shadow-2xl relative overflow-hidden flex flex-col"
+          id="detailPanel"
+        >
+          <div
+            class="p-6 border-b border-dark-700 bg-dark-900/50 flex justify-between items-start"
+          >
+            <div>
+              <div class="flex items-center gap-3 mb-2">
+                <span
+                  class="px-2 py-1 bg-accent-red text-white text-[10px] font-bold uppercase rounded tracking-wider"
+                  id="detailBadge"
+                  >CRITICAL</span
+                >
+                <span class="text-xs text-slate-400" id="detailTime"
+                  >2 hours ago</span
+                >
+              </div>
+              <h2
+                class="text-2xl font-bold text-white leading-tight"
+                id="detailTitle"
+              >
+                Project Cost Overrun Detected
+              </h2>
+              <p class="text-sm text-slate-400 mt-1" id="detailSubtitle">
+                Bridge Construction Project • Cost Center #402
+              </p>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-slate-500 uppercase">Risk Score</div>
+              <div class="text-3xl font-bold text-accent-red" id="detailScore">
+                92<span class="text-sm text-slate-500">/100</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-1 p-6 grid grid-cols-2 gap-8 overflow-y-auto">
+            <div class="space-y-6">
+              <div>
+                <h3
+                  class="text-sm font-bold text-accent-blue uppercase mb-3 border-b border-dark-700 pb-2"
+                >
+                  Root Cause Analysis
+                </h3>
+                <p
+                  class="text-sm text-slate-300 leading-relaxed"
+                  id="detailCause"
+                >
+                  Material cost index for "Steel Grade A" has increased by 15%
+                  globally. The current project budget did not account for this
+                  inflation rate, causing a deviation in procurement batch #4.
+                </p>
+              </div>
+
+              <div>
+                <h3
+                  class="text-sm font-bold text-accent-green uppercase mb-3 border-b border-dark-700 pb-2"
+                >
+                  Recommended Action
+                </h3>
+                <ul class="space-y-3" id="detailAction">
+                  <li class="flex gap-3 text-sm text-slate-300">
+                    <i class="fas fa-check-circle text-accent-green mt-0.5"></i>
+                    <span
+                      >Approve budget adjustment from Contingency Fund.</span
+                    >
+                  </li>
+                  <li class="flex gap-3 text-sm text-slate-300">
+                    <i class="fas fa-check-circle text-accent-green mt-0.5"></i>
+                    <span
+                      >Renegotiate payment terms with Vendor X to offset
+                      cashflow impact.</span
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div class="pt-4">
+                <button
+                  class="w-full bg-accent-blue hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition shadow-lg shadow-accent-blue/20"
+                >
+                  Generate Intervention Plan
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="bg-dark-900 rounded-xl p-5 border border-dark-700 relative"
+            >
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-bold text-slate-200">
+                  <i class="fas fa-robot mr-2 text-accent-purple"></i>AI Impact
+                  Prediction
+                </h3>
+                <span
+                  class="text-[10px] bg-dark-700 px-2 py-1 rounded text-slate-400"
+                  >Model v4.2</span
+                >
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span>Financial Loss (Estimated)</span>
+                    <span class="text-accent-red font-bold" id="detailLoss"
+                      >IDR -2.5 Miliar</span
+                    >
+                  </div>
+                  <div class="w-full bg-dark-700 h-1.5 rounded-full">
+                    <div
+                      class="bg-accent-red h-full rounded-full"
+                      style="width: 85%"
+                    ></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span>Schedule Slippage</span>
+                    <span class="text-accent-yellow font-bold" id="detailDelay"
+                      >+14 Days</span
+                    >
+                  </div>
+                  <div class="w-full bg-dark-700 h-1.5 rounded-full">
+                    <div
+                      class="bg-accent-yellow h-full rounded-full"
+                      style="width: 45%"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="h-32 mt-4 border-t border-dark-700 pt-4">
+                  <p class="text-[10px] text-center text-slate-500 mb-2">
+                    Trend Projection if Unresolved
+                  </p>
+                  <canvas id="impactChart"></canvas>
+                </div>
+              </div>
+
+              <div
+                class="absolute top-0 right-0 w-20 h-20 bg-accent-purple/5 rounded-bl-full -z-0"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // --- 1. DUMMY DATA ALERTS  ---
+      const alerts = [
+        {
+          id: 1,
+          type: "critical",
+          category: "FINANCIAL",
+          title: "Project Cost Overrun",
+          subtitle: "Bridge Const. • Budget Exceeded",
+          time: "2h ago",
+          score: 92,
+          cause:
+            'Material cost index for "Steel Grade A" increased by 15%. Procurement Batch #4 exceeded allocated budget threshold.',
+          actions: [
+            "Approve budget adjustment from Contingency Fund.",
+            "Hold procurement for Phase 3 until price stabilizes.",
+          ],
+          impact: {
+            loss: "IDR -2.5 Miliar",
+            delay: "+14 Days",
+            lossPct: 85,
+            delayPct: 45,
+          },
+          chartData: [10, 25, 45, 70, 92], // Kenaikan risiko eksponensial
+        },
+        {
+          id: 2,
+          type: "critical",
+          category: "ASSET",
+          title: "Critical Asset Failure",
+          subtitle: "Crane #09 • Hydraulic Leak",
+          time: "4h ago",
+          score: 88,
+          cause:
+            "Sensor pressure dropped below safe limit (20 PSI). Preventive maintenance was skipped last month.",
+          actions: [
+            "Dispatch Emergency Repair Team (ETA: 30 mins).",
+            "Reroute backup crane from Zone B to avoid stoppage.",
+          ],
+          impact: {
+            loss: "IDR -500 Juta",
+            delay: "+2 Days",
+            lossPct: 40,
+            delayPct: 20,
+          },
+          chartData: [50, 60, 75, 80, 88],
+        },
+        {
+          id: 3,
+          type: "warning",
+          category: "SCHEDULE",
+          title: "Phase 2 Delay Risk",
+          subtitle: "Sentul Tower A • Weather Impact",
+          time: "6h ago",
+          score: 65,
+          cause:
+            "Heavy rain forecast for next 3 days will halt concrete pouring activities.",
+          actions: [
+            "Reschedule pouring to night shift if weather permits.",
+            "Activate overtime for finishing team next week.",
+          ],
+          impact: {
+            loss: "IDR -150 Juta",
+            delay: "+3 Days",
+            lossPct: 20,
+            delayPct: 30,
+          },
+          chartData: [20, 30, 45, 55, 65],
+        },
+        {
+          id: 4,
+          type: "warning",
+          category: "COMPLIANCE",
+          title: "License Expiry Warning",
+          subtitle: "Heavy Equipment Certs",
+          time: "1d ago",
+          score: 45,
+          cause: "Operating licenses for 3 Dump Trucks expiring in 7 days.",
+          actions: [
+            "Submit renewal documents to department today.",
+            "Schedule inspection.",
+          ],
+          impact: {
+            loss: "Potential Fine",
+            delay: "None",
+            lossPct: 10,
+            delayPct: 0,
+          },
+          chartData: [10, 10, 20, 30, 45],
+        },
+        {
+          id: 5,
+          type: "info",
+          category: "SYSTEM",
+          title: "Server Maintenance",
+          subtitle: "Planned Downtime",
+          time: "2d ago",
+          score: 10,
+          cause: "Routine patch update.",
+          actions: ["Notify users."],
+          impact: { loss: "None", delay: "None", lossPct: 0, delayPct: 0 },
+          chartData: [0, 0, 5, 5, 10],
+        },
+      ];
+
+      // --- 2. RENDER LIST ---
+      const listContainer = document.getElementById("alertListContainer");
+
+      alerts.forEach((alert) => {
+        let borderClass =
+          alert.type === "critical"
+            ? "border-accent-red"
+            : alert.type === "warning"
+              ? "border-accent-yellow"
+              : "border-accent-blue";
+        let bgClass =
+          alert.type === "critical"
+            ? "bg-accent-red/10"
+            : alert.type === "warning"
+              ? "bg-accent-yellow/10"
+              : "bg-dark-800";
+        let icon =
+          alert.category === "FINANCIAL"
+            ? "fa-coins"
+            : alert.category === "ASSET"
+              ? "fa-tools"
+              : "fa-clock";
+
+        const item = document.createElement("div");
+        item.className = `p-4 rounded-lg border-l-4 ${borderClass} ${bgClass} cursor-pointer hover:bg-dark-700 transition group relative`;
+        item.onclick = () => loadDetail(alert);
+
+        item.innerHTML = `
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">${alert.category}</span>
+                    <span class="text-[10px] text-slate-500">${alert.time}</span>
+                </div>
+                <h3 class="font-bold text-slate-200 group-hover:text-white">${alert.title}</h3>
+                <p class="text-xs text-slate-400 mt-1">${alert.subtitle}</p>
+                <div class="mt-2 flex items-center justify-between">
+                     <span class="text-xs font-bold ${alert.type === "critical" ? "text-accent-red" : "text-slate-400"}">
+                        Score: ${alert.score}
+                     </span>
+                     <i class="fas fa-chevron-right text-xs text-slate-600 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            `;
+        listContainer.appendChild(item);
+      });
+
+      // --- 3. CHART INITIALIZATION (Empty) ---
+      let impactChart = null;
+
+      function initChart(data, color) {
+        const ctx = document.getElementById("impactChart").getContext("2d");
+
+        if (impactChart) impactChart.destroy();
+
+        impactChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Now"],
+            datasets: [
+              {
+                label: "Risk Escalation",
+                data: data,
+                borderColor: color,
+                backgroundColor: color + "20", // Opacity hex hack
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { display: false, min: 0, max: 100 },
+              x: { display: false },
+            },
+          },
+        });
+      }
+
+      // --- 4. LOAD DETAIL LOGIC ---
+      function loadDetail(data) {
+        // UI Toggle
+        document.getElementById("emptyState").classList.add("hidden");
+        document.getElementById("detailPanel").classList.remove("hidden");
+
+        // Populate Text
+        document.getElementById("detailTitle").innerText = data.title;
+        document.getElementById("detailSubtitle").innerText = data.subtitle;
+        document.getElementById("detailTime").innerText = data.time;
+        document.getElementById("detailScore").innerHTML =
+          `${data.score}<span class="text-sm text-slate-500">/100</span>`;
+        document.getElementById("detailCause").innerText = data.cause;
+
+        // Populate Badge Color
+        const badge = document.getElementById("detailBadge");
+        badge.innerText = data.type.toUpperCase();
+        badge.className = `px-2 py-1 text-white text-[10px] font-bold uppercase rounded tracking-wider ${data.type === "critical" ? "bg-accent-red" : "bg-accent-yellow"}`;
+
+        // Populate Actions Loop
+        const actionList = document.getElementById("detailAction");
+        actionList.innerHTML = "";
+        data.actions.forEach((act) => {
+          actionList.innerHTML += `
+                    <li class="flex gap-3 text-sm text-slate-300">
+                        <i class="fas fa-check-circle text-accent-green mt-0.5"></i>
+                        <span>${act}</span>
+                    </li>`;
+        });
+
+        // Populate AI Simulation
+        document.getElementById("detailLoss").innerText = data.impact.loss;
+        document.getElementById("detailDelay").innerText = data.impact.delay;
+
+        // Init Chart with Specific Color based on severity
+        const chartColor = data.type === "critical" ? "#ef4444" : "#f59e0b";
+        initChart(data.chartData, chartColor);
+      }
+    </script>
+  </body>
+</html>

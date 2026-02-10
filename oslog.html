@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSLOG - Equipment Intelligence</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              dark: {
+                900: "#0f172a",
+                800: "#1e293b",
+                700: "#334155",
+                600: "#475569",
+              },
+              accent: {
+                blue: "#38bdf8",
+                green: "#10b981",
+                red: "#ef4444",
+                yellow: "#f59e0b",
+                purple: "#8b5cf6",
+              },
+            },
+            fontFamily: { sans: ["Inter", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-dark-900 text-slate-50 min-h-screen flex flex-col font-sans">
+    <nav
+      class="bg-dark-800 border-b border-dark-700 px-6 py-4 flex justify-between items-center sticky top-0 z-50"
+    >
+      <div class="flex items-center gap-4">
+        <a
+          href="main.html"
+          class="bg-dark-700 hover:bg-dark-600 text-slate-300 px-3 py-2 rounded-lg transition"
+        >
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+          <h1 class="text-xl font-bold text-accent-blue tracking-wide">
+            OSLOG
+            <span class="text-slate-500 font-normal">| Fleet & Equipment</span>
+          </h1>
+        </div>
+      </div>
+      <div class="flex gap-2 bg-dark-900 p-1 rounded-lg border border-dark-700">
+        <button
+          class="px-3 py-1.5 text-xs font-medium bg-dark-700 text-white rounded shadow"
+        >
+          All Fleet
+        </button>
+        <button
+          class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white"
+        >
+          Heavy Equip
+        </button>
+        <button
+          class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white"
+        >
+          Logistics
+        </button>
+      </div>
+    </nav>
+
+    <main class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="lg:col-span-8 flex flex-col gap-6">
+        <div class="grid grid-cols-4 gap-4">
+          <div
+            class="bg-dark-800 p-4 rounded-xl border border-dark-700 relative overflow-hidden"
+          >
+            <div class="absolute right-2 top-2 text-dark-700 text-4xl">
+              <i class="fas fa-truck-monster"></i>
+            </div>
+            <div class="text-xs text-slate-400 uppercase font-bold">
+              Total Fleet
+            </div>
+            <div class="text-2xl font-bold mt-1">
+              42 <span class="text-sm font-normal text-slate-500">Units</span>
+            </div>
+            <div class="text-xs text-accent-green mt-2 flex items-center gap-1">
+              <i class="fas fa-check-circle"></i> 38 Operational
+            </div>
+          </div>
+
+          <div class="bg-dark-800 p-4 rounded-xl border border-dark-700">
+            <div class="text-xs text-slate-400 uppercase font-bold">
+              Utilization Rate
+            </div>
+            <div class="text-2xl font-bold mt-1 text-accent-blue">78%</div>
+            <div
+              class="w-full bg-dark-900 h-1.5 rounded-full mt-3 overflow-hidden"
+            >
+              <div class="bg-accent-blue h-full" style="width: 78%"></div>
+            </div>
+          </div>
+
+          <div class="bg-dark-800 p-4 rounded-xl border border-dark-700">
+            <div class="text-xs text-slate-400 uppercase font-bold">
+              Idle Rate
+            </div>
+            <div class="text-2xl font-bold mt-1 text-accent-yellow">12%</div>
+            <div class="text-xs text-slate-400 mt-2">
+              Avg. 2.4 hrs/day
+              <i class="fas fa-arrow-down text-accent-green ml-1"></i>
+            </div>
+          </div>
+
+          <div class="bg-dark-800 p-4 rounded-xl border border-dark-700">
+            <div class="text-xs text-slate-400 uppercase font-bold">
+              Avg Cost / Hour
+            </div>
+            <div class="text-2xl font-bold mt-1 text-slate-200">250k</div>
+            <div class="text-xs text-accent-red mt-2 flex items-center gap-1">
+              <i class="fas fa-arrow-up"></i> +5% vs Plan
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 rounded-xl border border-dark-700 flex-1 flex flex-col overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-dark-700 flex justify-between items-center bg-dark-800"
+          >
+            <h2 class="font-bold text-lg">Active Fleet Status</h2>
+            <div class="relative">
+              <input
+                type="text"
+                placeholder="Search Unit ID..."
+                class="bg-dark-900 border border-dark-700 text-xs px-3 py-2 rounded-lg text-white focus:outline-none focus:border-accent-blue w-48"
+              />
+              <i
+                class="fas fa-search absolute right-3 top-2.5 text-slate-500 text-xs"
+              ></i>
+            </div>
+          </div>
+
+          <div class="overflow-auto">
+            <table class="w-full text-sm text-left">
+              <thead
+                class="text-xs text-slate-400 uppercase bg-dark-900/50 sticky top-0 z-10"
+              >
+                <tr>
+                  <th class="px-4 py-3">Unit Code</th>
+                  <th class="px-4 py-3">Type & Location [cite: 77]</th>
+                  <th class="px-4 py-3 text-center">Fuel Level</th>
+                  <th class="px-4 py-3">Hour Meter (HM)</th>
+                  <th class="px-4 py-3 text-right">Status</th>
+                  <th class="px-4 py-3 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody
+                class="divide-y divide-dark-700"
+                id="fleetTableBody"
+              ></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-4 flex flex-col gap-6">
+        <div
+          class="bg-dark-800 rounded-xl border border-dark-700 p-5 flex flex-col"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="font-bold text-sm uppercase text-slate-400">
+                Live Telemetry
+              </h2>
+              <div class="text-xs text-accent-green font-mono animate-pulse">
+                ● Receiving Data
+              </div>
+            </div>
+            <select
+              class="bg-dark-900 border border-dark-700 text-xs rounded px-2 py-1 text-slate-300"
+            >
+              <option>EXC-001</option>
+              <option>DT-105</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div
+              class="bg-dark-900 p-3 rounded border border-dark-700 text-center"
+            >
+              <div class="text-[10px] text-slate-500 uppercase">
+                Engine Temp
+              </div>
+              <div class="text-xl font-bold text-slate-200">85°C</div>
+            </div>
+            <div
+              class="bg-dark-900 p-3 rounded border border-dark-700 text-center"
+            >
+              <div class="text-[10px] text-slate-500 uppercase">
+                Oil Pressure
+              </div>
+              <div class="text-xl font-bold text-slate-200">45 PSI</div>
+            </div>
+          </div>
+
+          <div class="flex-1 relative h-32 w-full">
+            <canvas id="telemetryChart"></canvas>
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 rounded-xl border border-dark-700 flex-1 flex flex-col p-5"
+        >
+          <h2 class="font-bold text-sm uppercase text-slate-400 mb-4">
+            Downtime Logs (Today)
+          </h2>
+
+          <div class="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+            <div
+              class="p-3 bg-dark-900/50 rounded-lg border-l-2 border-accent-red"
+            >
+              <div class="flex justify-between mb-1">
+                <span class="font-bold text-xs text-white"
+                  >DT-102 (Dump Truck)</span
+                >
+                <span class="text-[10px] text-slate-500">10:30 AM</span>
+              </div>
+              <div class="text-xs text-slate-300">Breakdown: Tyre Puncture</div>
+              <div class="text-[10px] text-accent-red mt-1">
+                Duration: 2h 15m
+              </div>
+            </div>
+
+            <div
+              class="p-3 bg-dark-900/50 rounded-lg border-l-2 border-accent-yellow"
+            >
+              <div class="flex justify-between mb-1">
+                <span class="font-bold text-xs text-white"
+                  >EXC-004 (Excavator)</span
+                >
+                <span class="text-[10px] text-slate-500">08:15 AM</span>
+              </div>
+              <div class="text-xs text-slate-300">Idle: No Operator</div>
+              <div class="text-[10px] text-accent-yellow mt-1">
+                Duration: 45m
+              </div>
+            </div>
+
+            <div
+              class="p-3 bg-dark-900/50 rounded-lg border-l-2 border-accent-blue"
+            >
+              <div class="flex justify-between mb-1">
+                <span class="font-bold text-xs text-white">CRN-01 (Crane)</span>
+                <span class="text-[10px] text-slate-500">01:00 PM</span>
+              </div>
+              <div class="text-xs text-slate-300">Refueling Stop</div>
+              <div class="text-[10px] text-accent-blue mt-1">Duration: 20m</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // --- 1. DUMMY DATA FLEET [cite: 101-103] ---
+      const fleet = [
+        {
+          code: "EXC-001",
+          type: "Excavator PC200",
+          loc: "Sentul Zone A",
+          fuel: 75,
+          hm: 12450,
+          status: "Working",
+        },
+        {
+          code: "EXC-004",
+          type: "Excavator PC200",
+          loc: "Bridge Site",
+          fuel: 15,
+          hm: 11200,
+          status: "Low Fuel",
+        },
+        {
+          code: "DT-102",
+          type: "Dump Truck 20T",
+          loc: "Hauling Road",
+          fuel: 0,
+          hm: 5430,
+          status: "Breakdown",
+        },
+        {
+          code: "DT-105",
+          type: "Dump Truck 20T",
+          loc: "Sentul Zone B",
+          fuel: 60,
+          hm: 5600,
+          status: "Working",
+        },
+        {
+          code: "DOZ-02",
+          type: "Bulldozer D85",
+          loc: "Land Clearing",
+          fuel: 40,
+          hm: 8900,
+          status: "Idle",
+        },
+        {
+          code: "CRN-01",
+          type: "Rough Terrain Crane",
+          loc: "Main Structure",
+          fuel: 88,
+          hm: 3200,
+          status: "Working",
+        },
+        {
+          code: "VIB-01",
+          type: "Vibro Roller",
+          loc: "Road Access",
+          fuel: 92,
+          hm: 1200,
+          status: "Working",
+        },
+      ];
+
+      // --- 2. RENDER TABLE ---
+      const tableBody = document.getElementById("fleetTableBody");
+
+      fleet.forEach((unit) => {
+        // Status Logic
+        let statusBadge = "";
+        let rowClass = "hover:bg-dark-700/30";
+
+        if (unit.status === "Working") {
+          statusBadge =
+            '<span class="px-2 py-1 rounded text-xs bg-accent-green/20 text-accent-green border border-accent-green/20 font-bold">Working</span>';
+        } else if (unit.status === "Idle") {
+          statusBadge =
+            '<span class="px-2 py-1 rounded text-xs bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/20 font-bold">Idle</span>';
+        } else if (unit.status === "Breakdown") {
+          statusBadge =
+            '<span class="px-2 py-1 rounded text-xs bg-accent-red/20 text-accent-red border border-accent-red/20 font-bold">Breakdown</span>';
+          rowClass = "bg-accent-red/5 hover:bg-accent-red/10";
+        } else if (unit.status === "Low Fuel") {
+          statusBadge =
+            '<span class="px-2 py-1 rounded text-xs bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/20 font-bold"><i class="fas fa-gas-pump mr-1"></i>Low Fuel</span>';
+        }
+
+        // Fuel Bar Color
+        let fuelColor =
+          unit.fuel < 20
+            ? "bg-accent-red"
+            : unit.fuel < 50
+              ? "bg-accent-yellow"
+              : "bg-accent-green";
+
+        const row = `
+                <tr class="${rowClass} transition border-b border-dark-700">
+                    <td class="px-4 py-3 font-bold text-slate-200">${unit.code}</td>
+                    <td class="px-4 py-3">
+                        <div class="text-sm font-semibold">${unit.type}</div>
+                        <div class="text-xs text-slate-500"><i class="fas fa-map-marker-alt mr-1"></i> ${unit.loc}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-gas-pump text-[10px] text-slate-500"></i>
+                            <div class="flex-1 h-2 bg-dark-900 rounded-full overflow-hidden">
+                                <div class="h-full ${fuelColor}" style="width: ${unit.fuel}%"></div>
+                            </div>
+                            <span class="text-xs font-mono w-8 text-right">${unit.fuel}%</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 font-mono text-slate-300 text-sm">${unit.hm.toLocaleString()} h</td>
+                    <td class="px-4 py-3 text-right">${statusBadge}</td>
+                    <td class="px-4 py-3 text-center">
+                         <button class="text-slate-400 hover:text-accent-blue transition"><i class="fas fa-eye"></i></button>
+                    </td>
+                </tr>
+            `;
+        tableBody.innerHTML += row;
+      });
+
+      // --- 3. LIVE TELEMETRY CHART (Simulasi Real-time) ---
+      const ctx = document.getElementById("telemetryChart").getContext("2d");
+
+      // Data Awal
+      const initialData = Array(20).fill(2000);
+
+      const chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: Array(20).fill(""),
+          datasets: [
+            {
+              label: "Engine RPM",
+              data: initialData,
+              borderColor: "#38bdf8",
+              borderWidth: 2,
+              backgroundColor: "rgba(56, 189, 248, 0.1)",
+              fill: true,
+              tension: 0.4,
+              pointRadius: 0,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false, // Matikan animasi default chart.js agar update realtime smooth
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              min: 1000,
+              max: 3000,
+              grid: { color: "#334155" },
+              ticks: { display: false }, // Hide ticks for cleaner look
+            },
+            x: { display: false },
+          },
+        },
+      });
+
+      // Loop Simulasi Real-time
+      setInterval(() => {
+        const data = chart.data.datasets[0].data;
+        const labels = chart.data.labels;
+
+        // Hapus data lama
+        data.shift();
+
+        // Tambah data baru (Random di sekitar 1800-2200 RPM)
+        const newRpm = 1800 + Math.random() * 400;
+        data.push(newRpm);
+
+        chart.update();
+      }, 1000); // Update setiap 1 detik
+    </script>
+  </body>
+</html>

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSPRO - Project Intelligence</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              dark: { 900: "#0f172a", 800: "#1e293b", 700: "#334155" },
+              accent: {
+                blue: "#38bdf8",
+                green: "#10b981",
+                red: "#ef4444",
+                yellow: "#f59e0b",
+              },
+            },
+            fontFamily: { sans: ["Inter", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-dark-900 text-slate-50 min-h-screen flex flex-col font-sans">
+    <nav
+      class="bg-dark-800 border-b border-dark-700 px-6 py-4 flex justify-between items-center sticky top-0 z-50"
+    >
+      <div class="flex items-center gap-4">
+        <a
+          href="main.html"
+          class="bg-dark-700 hover:bg-dark-600 text-slate-300 px-3 py-2 rounded-lg transition"
+        >
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+          <h1 class="text-xl font-bold text-accent-blue tracking-wide">
+            OSPRO
+            <span class="text-slate-500 font-normal"
+              >| Project & Maintenance</span
+            >
+          </h1>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button
+          class="px-4 py-2 text-sm bg-accent-blue/10 text-accent-blue border border-accent-blue/20 rounded hover:bg-accent-blue/20 transition"
+        >
+          <i class="fas fa-file-export mr-2"></i>Export Report
+        </button>
+        <button
+          class="px-4 py-2 text-sm bg-accent-green text-dark-900 font-bold rounded hover:bg-green-400 transition"
+        >
+          <i class="fas fa-plus mr-2"></i>New Project
+        </button>
+      </div>
+    </nav>
+
+    <main class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="lg:col-span-8 flex flex-col gap-6">
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-dark-800 p-4 rounded-xl border border-dark-700">
+            <div class="text-xs text-slate-400 uppercase">Active Projects</div>
+            <div class="text-2xl font-bold">12</div>
+            <div class="text-xs text-accent-green mt-1">
+              <i class="fas fa-check"></i> 8 On Track
+            </div>
+          </div>
+          <div class="bg-dark-800 p-4 rounded-xl border border-dark-700">
+            <div class="text-xs text-slate-400 uppercase">Critical Delay</div>
+            <div class="text-2xl font-bold text-accent-red">3</div>
+            <div class="text-xs text-slate-400 mt-1">Needs Attention</div>
+          </div>
+          <div class="bg-dark-800 p-4 rounded-xl border border-dark-700">
+            <div class="text-xs text-slate-400 uppercase">Budget Absorbed</div>
+            <div class="text-2xl font-bold text-accent-yellow">68%</div>
+            <div class="text-xs text-slate-400 mt-1">IDR 1.2T / 1.8T</div>
+          </div>
+          <div class="bg-dark-800 p-4 rounded-xl border border-dark-700">
+            <div class="text-xs text-slate-400 uppercase">Avg Deviation</div>
+            <div class="text-2xl font-bold text-accent-red">-4.2%</div>
+            <div class="text-xs text-slate-400 mt-1">Behind Schedule</div>
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 rounded-xl border border-dark-700 flex-1 flex flex-col overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-dark-700 flex justify-between items-center"
+          >
+            <h2 class="font-bold text-lg">Active Projects Portfolio</h2>
+            <div class="flex gap-2 text-xs">
+              <span
+                class="px-2 py-1 bg-dark-700 rounded cursor-pointer text-white"
+                >All</span
+              >
+              <span
+                class="px-2 py-1 hover:bg-dark-700 rounded cursor-pointer text-slate-400"
+                >Construction</span
+              >
+              <span
+                class="px-2 py-1 hover:bg-dark-700 rounded cursor-pointer text-slate-400"
+                >Infra</span
+              >
+            </div>
+          </div>
+
+          <div class="overflow-auto">
+            <table class="w-full text-sm text-left">
+              <thead
+                class="text-xs text-slate-400 uppercase bg-dark-900/50 sticky top-0"
+              >
+                <tr>
+                  <th class="px-4 py-3">Project Name</th>
+                  <th class="px-4 py-3">Timeline</th>
+                  <th class="px-4 py-3 w-1/4">Progress (Plan vs Actual)</th>
+                  <th class="px-4 py-3">Budget [cite: 73]</th>
+                  <th class="px-4 py-3 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody
+                class="divide-y divide-dark-700"
+                id="projectTableBody"
+              ></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-4 flex flex-col gap-6">
+        <div
+          class="bg-dark-800 p-5 rounded-xl border border-dark-700 h-[320px] flex flex-col"
+        >
+          <div class="mb-4">
+            <h2 class="font-bold text-sm uppercase text-slate-400">
+              Project S-Curve (Selected)
+            </h2>
+            <div class="text-lg font-bold text-accent-blue">Sentul Tower A</div>
+          </div>
+          <div class="flex-1 relative">
+            <canvas id="sCurveChart"></canvas>
+          </div>
+        </div>
+
+        <div
+          class="bg-dark-800 rounded-xl border border-dark-700 flex-1 flex flex-col p-5"
+        >
+          <h2 class="font-bold text-sm uppercase text-slate-400 mb-4">
+            Upcoming Maintenance
+          </h2>
+
+          <div class="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+            <div class="flex gap-3 relative pb-4 border-l border-dark-700 pl-4">
+              <div
+                class="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-accent-red ring-4 ring-dark-800"
+              ></div>
+              <div class="flex-1">
+                <div class="flex justify-between">
+                  <span class="text-xs font-bold text-accent-red">OVERDUE</span>
+                  <span class="text-[10px] text-slate-500">2 Days Ago</span>
+                </div>
+                <div class="font-semibold text-sm mt-1">
+                  Excavator #04 (Hydraulic)
+                </div>
+                <div class="text-xs text-slate-400">
+                  Lokasi: Bridge Construction Site
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 relative pb-4 border-l border-dark-700 pl-4">
+              <div
+                class="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-accent-yellow ring-4 ring-dark-800"
+              ></div>
+              <div class="flex-1">
+                <div class="flex justify-between">
+                  <span class="text-xs font-bold text-accent-yellow"
+                    >TOMORROW</span
+                  >
+                  <span class="text-[10px] text-slate-500">Feb 06</span>
+                </div>
+                <div class="font-semibold text-sm mt-1">
+                  Genset Unit B (Regular)
+                </div>
+                <div class="text-xs text-slate-400">Lokasi: Sentul Tower A</div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 relative pb-4 border-l border-dark-700 pl-4">
+              <div
+                class="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-accent-green ring-4 ring-dark-800"
+              ></div>
+              <div class="flex-1">
+                <div class="flex justify-between">
+                  <span class="text-xs font-bold text-accent-green"
+                    >UPCOMING</span
+                  >
+                  <span class="text-[10px] text-slate-500">Feb 10</span>
+                </div>
+                <div class="font-semibold text-sm mt-1">
+                  Crane #02 (Safety Check)
+                </div>
+                <div class="text-xs text-slate-400">
+                  Lokasi: Main Road Project
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // --- 1. DUMMY DATA PROJECT [cite: 98-100] ---
+      const projects = [
+        {
+          name: "Sentul Tower A",
+          start: "Jan 2023",
+          end: "Dec 2024",
+          plan: 65,
+          actual: 68, // Ahead
+          budgetTotal: "50M",
+          budgetUsed: "30M",
+          status: "On Track",
+        },
+        {
+          name: "Bridge Construction",
+          start: "Mar 2023",
+          end: "Aug 2024",
+          plan: 50,
+          actual: 42, // Behind
+          budgetTotal: "120M",
+          budgetUsed: "65M", // Overbudget relative to progress
+          status: "Critical",
+        },
+        {
+          name: "Road Upgrade Sec-2",
+          start: "Jun 2023",
+          end: "Jan 2024",
+          plan: 90,
+          actual: 88, // Slightly Behind
+          budgetTotal: "15M",
+          budgetUsed: "12M",
+          status: "Delay",
+        },
+        {
+          name: "Water Treatment Plant",
+          start: "Feb 2023",
+          end: "Nov 2024",
+          plan: 40,
+          actual: 40, // Match
+          budgetTotal: "80M",
+          budgetUsed: "32M",
+          status: "On Track",
+        },
+        {
+          name: "Office Renovation",
+          start: "Oct 2023",
+          end: "Mar 2024",
+          plan: 70,
+          actual: 75, // Ahead
+          budgetTotal: "5M",
+          budgetUsed: "3M",
+          status: "On Track",
+        },
+      ];
+
+      // --- 2. RENDER TABLE ---
+      const tableBody = document.getElementById("projectTableBody");
+
+      projects.forEach((p) => {
+        // Logic Warna Status
+        let statusColor =
+          "bg-accent-green/10 text-accent-green border-accent-green/20";
+        let progressColor = "bg-accent-green";
+
+        if (p.status === "Critical") {
+          statusColor = "bg-accent-red/10 text-accent-red border-accent-red/20";
+          progressColor = "bg-accent-red";
+        } else if (p.status === "Delay") {
+          statusColor =
+            "bg-accent-yellow/10 text-accent-yellow border-accent-yellow/20";
+          progressColor = "bg-accent-yellow";
+        }
+
+        const row = `
+                <tr class="hover:bg-dark-700/30 transition group cursor-pointer border-b border-dark-700">
+                    <td class="px-4 py-4">
+                        <div class="font-bold text-slate-200">${p.name}</div>
+                        <div class="text-xs text-slate-500">ID: PRJ-${Math.floor(Math.random() * 1000)}</div>
+                    </td>
+                    <td class="px-4 py-4 text-xs text-slate-400">
+                        <div><i class="fas fa-play text-[10px] mr-1"></i> ${p.start}</div>
+                        <div><i class="fas fa-flag-checkered text-[10px] mr-1"></i> ${p.end}</div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">Plan: ${p.plan}%</span>
+                            <span class="font-bold text-white">${p.actual}%</span>
+                        </div>
+                        <div class="w-full bg-dark-900 h-2 rounded-full overflow-hidden relative">
+                            <div class="absolute top-0 bottom-0 w-0.5 bg-white z-10 opacity-50" style="left: ${p.plan}%"></div>
+                            <div class="h-full ${progressColor}" style="width: ${p.actual}%"></div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="text-sm font-semibold">${p.budgetUsed}</div>
+                        <div class="text-xs text-slate-500">of ${p.budgetTotal}</div>
+                    </td>
+                    <td class="px-4 py-4 text-right">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold border ${statusColor}">
+                            ${p.status}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        tableBody.innerHTML += row;
+      });
+
+      // --- 3. RENDER CHART S-CURVE (Chart.js) ---
+      const ctx = document.getElementById("sCurveChart").getContext("2d");
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+          datasets: [
+            {
+              label: "Planned Progress",
+              data: [10, 25, 35, 45, 55, 65, 75, 85], // Linear naik
+              borderColor: "#94a3b8", // Gray (Baseline)
+              borderDash: [5, 5],
+              tension: 0.4,
+              pointRadius: 0,
+            },
+            {
+              label: "Actual Progress",
+              data: [10, 22, 30, 38, 45, 50, 52, 55], // Melambat (Gap melebar)
+              borderColor: "#38bdf8", // Accent Blue
+              backgroundColor: "rgba(56, 189, 248, 0.1)",
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: "#0f172a",
+              pointBorderWidth: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: "#94a3b8", font: { size: 10 } } },
+            tooltip: { mode: "index", intersect: false },
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+              grid: { color: "#334155" },
+              ticks: { color: "#94a3b8", callback: (val) => val + "%" },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: "#94a3b8" },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
